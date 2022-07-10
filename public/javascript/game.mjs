@@ -8,6 +8,11 @@ if (!username) {
 
 const socket = io('http://localhost:3002', { query: { username } });
 
-socket.on("USER_EXIST", (x) => {showMessageModal({message: x})})
-
-// socket.on("USER_EXIST", (x) => {console.log(x)})
+socket.on("USER_EXIST", 
+(x) => {showMessageModal({
+	message: x,
+	onClose: () => {
+		sessionStorage.clear(); window.location.replace('/login');
+	}
+	})
+});
