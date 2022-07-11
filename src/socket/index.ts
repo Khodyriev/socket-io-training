@@ -6,6 +6,7 @@ const rooms: Array<string> = [];
 
 export default (io: Server) => {
 	io.on('connection', socket => {
+		socket.emit("UPDATE_ROOMS", rooms);
 		const username = socket.handshake.query.username as string;
 		console.log(`${username} connected`);		
 			if (activeUsers.indexOf(username) == -1) {
@@ -26,6 +27,7 @@ export default (io: Server) => {
 			if (rooms.indexOf(newRoomName) == -1) {
 				rooms.push(newRoomName);
 				console.log(rooms);
+				io.emit("ADD_NEW_ROOM", newRoomName)
 			} else {
 				socket.emit("ROOM_EXISTS", "Such room already exists!")
 			}

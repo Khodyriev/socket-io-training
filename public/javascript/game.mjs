@@ -1,4 +1,5 @@
 import { showInputModal, showResultsModal, showMessageModal } from './views/modal.mjs';
+import { appendRoomElement, updateNumberOfUsersInRoom, removeRoomElement } from './views/room.mjs';
 
 const username = sessionStorage.getItem('username');
 
@@ -23,9 +24,6 @@ let newRoomName = null;
 const onSubmitRoomName = () => {
 	socket.emit("CREATE_NEW_ROOM", newRoomName);
 	console.log(newRoomName);
-// 	newRoomName = onChangeInput();
-// 	const roomName = inputElement.value;
-// 	console.log(roomName)
 };
 
 document.querySelector("#add-room-btn").addEventListener("click", 
@@ -40,3 +38,22 @@ document.querySelector("#add-room-btn").addEventListener("click",
 	);
 
 socket.on("ROOM_EXISTS", (x) => {showMessageModal({message: x})});
+
+socket.on("ADD_NEW_ROOM", (newRoomName) => {
+	console.log(`A new room - ${newRoomName} was added`)
+	appendRoomElement({
+		name: newRoomName,
+		numberOfUsers: 1
+	})
+})
+
+socket.on("UPDATE_ROOMS", (rooms) => {
+	console.log(rooms);
+	console.log('All created rooms are added')
+	rooms.forEach(element => {
+		appendRoomElement({
+			name: element,
+			numberOfUsers: 1
+		})
+	});
+})
