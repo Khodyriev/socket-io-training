@@ -45,7 +45,8 @@ socket.on("ADD_NEW_ROOM", (newRoomName) => {
 	appendRoomElement({
 		name: newRoomName,
 		numberOfUsers: 1
-	})
+	});
+	document.querySelector(`.join-btn[data-room-name='${newRoomName}']`).addEventListener("click", () => {socket.emit("JOINING_ROOM", newRoomName, username)});
 })
 
 socket.on("JOINING_NEW_ROOM", (newRoomName) => {
@@ -58,20 +59,50 @@ socket.on("JOINING_NEW_ROOM", (newRoomName) => {
 		isCurrentUser: true
 	});
 	document.querySelector("#quit-room-btn").addEventListener("click", () => {
+		removeUserElement(username);
 		document.querySelector("#game-page").classList.toggle("display-none");
 		document.querySelector("#rooms-page").classList.toggle("display-none");
-		socket.emit("LEAVING_THE_ROOM", newRoomName)
-	})
-})
+		socket.emit("LEAVING_THE_ROOM", newRoomName, username)
+	});
+});
 
-socket.on("DELETING_ROOM", (room) => removeRoomElement(room))
+socket.on("JOINED_ROOM", (room) => {
+	document.querySelector("#rooms-page").classList.toggle("display-none");
+	document.querySelector("#game-page").classList.toggle("display-none");
+	document.querySelector("#room-name").textContent = room;
 
+
+	appendUserElement({
+		username: username,
+		ready: false,
+		isCurrentUser: true
+	});
+	document.querySelector("#quit-room-btn").addEventListener("click", () => {
+		removeUserElement(username);
+		document.querySelector("#game-page").classList.toggle("display-none");
+		document.querySelector("#rooms-page").classList.toggle("display-none");
+		socket.emit("LEAVING_THE_ROOM", room, username)
+	});
+});
+
+socket.on("DELETING_ROOM", (room) => removeRoomElement(room));
+
+socket.on("TO_MANY_USERS", (x) => {showMessageModal({message: x})});
+
+socket.on("UPDATE_COUNTER", (room, counter) => {	
+	updateNumberOfUsersInRoom({
+		name: room, 
+		numberOfUsers: counter
+	})});
+
+socket.on("REMOVE_USER_ELEMENT", (user) => {removeUserElement(user)});
 
 socket.on("UPDATE_ROOMS", (rooms) => {	
 	rooms.forEach((item) => {
 		appendRoomElement({
 			name: item[0],
 			numberOfUsers: item[1]
-		})
+		});
+		document.querySelector(`.join-btn[data-room-name='${item[0]}']`).addEventListener("click", () => {socket.emit("JOINING_ROOM", item[0], username)});
 	});
 })

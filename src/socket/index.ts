@@ -1,5 +1,6 @@
+import { emit } from 'process';
 import { Server } from 'socket.io';
-import * as config from './config';
+import { MAXIMUM_USERS_FOR_ONE_ROOM, SECONDS_TIMER_BEFORE_START_GAME, SECONDS_FOR_GAME } from './config';
 
 const activeUsers: Array<string> = [];
 const rooms: Map<string, number> = new Map();
@@ -49,19 +50,53 @@ export default (io: Server) => {
 			};
 		});
 
-		socket.on("LEAVING_THE_ROOM", (theRoom) => {
+		socket.on("LEAVING_THE_ROOM", (theRoom, user) => {
 			socket.leave(theRoom);
 			let counter = rooms.get(theRoom);
 					if (counter) {
 						counter--;
 						if (counter > 0) {
 						rooms.set(theRoom, counter);
+						io.emit("REMOVE_USER_ELEMENT", user);
+						io.emit("UPDATE_COUNTER", theRoom, counter);
 						} else {
 							io.emit("DELETING_ROOM", theRoom);
 							rooms.delete(theRoom);
 						}
 					} else {console.error("'Counter' is undefined!")}
 		});
+
+		socket.on("JOINING_ROOM", (room, user) => {
+			let counter = rooms.get(room);
+			if (!counter) {console.error(`Error! There is no such room as ${room} in the list`)			
+			} else if (counter >= MAXIMUM_USERS_FOR_ONE_ROOM) {socket.emit("TO_MANY_USERS", "To many users in this room")
+			} else {
+				socket.join(room);
+				counter++
+				rooms.set(room, counter);
+				io.emit("UPDATE_COUNTER", room, counter);
+				console.log(rooms);
+				console.log(room, counter);
+				socket.emit("JOINED_ROOM", room);
+
+				socket.on("disconnect", () => {
+					socket.leave(room);
+					let counter = rooms.get(room);
+					if (counter) {
+						counter--;
+						if (counter > 0) {
+						rooms.set(room, counter);
+						} else {
+							io.emit("DELETING_ROOM", room);
+							rooms.delete(room);
+						}
+					} else {console.error("'Counter' is undefined!")}					
+				});	
+			}
+		})
+
+
+
 
 
 
