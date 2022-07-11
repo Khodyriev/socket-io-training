@@ -23,7 +23,7 @@ let newRoomName = null;
 
 const onSubmitRoomName = () => {
 	socket.emit("CREATE_NEW_ROOM", newRoomName);
-	console.log(newRoomName);
+	// console.log(newRoomName);
 };
 
 document.querySelector("#add-room-btn").addEventListener("click", 
@@ -47,13 +47,23 @@ socket.on("ADD_NEW_ROOM", (newRoomName) => {
 	})
 })
 
+socket.on("JOINING_NEW_ROOM", (newRoomName) => {
+	document.querySelector("#rooms-page").classList.toggle("display-none");
+	document.querySelector("#game-page").classList.toggle("display-none");
+	document.querySelector("#room-name").textContent = newRoomName;
+	document.querySelector("#quit-room-btn").addEventListener("click", () => {
+		document.querySelector("#game-page").classList.toggle("display-none");
+		document.querySelector("#rooms-page").classList.toggle("display-none");
+	})
+})
+
+
+
 socket.on("UPDATE_ROOMS", (rooms) => {
-	console.log(rooms);
-	console.log('All created rooms are added')
-	rooms.forEach(element => {
+	rooms.forEach((value, key) => {
 		appendRoomElement({
-			name: element,
-			numberOfUsers: 1
+			name: key,
+			numberOfUsers: value
 		})
 	});
 })
