@@ -64,6 +64,7 @@ socket.on("JOINING_NEW_ROOM", (newRoomName) => {
 	})
 })
 
+socket.on("DELETING_ROOM", (room) => removeRoomElement(room))
 
 
 socket.on("UPDATE_ROOMS", (rooms) => {	
