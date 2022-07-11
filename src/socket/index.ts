@@ -6,7 +6,7 @@ const rooms: Map<string, number> = new Map();
 
 export default (io: Server) => {
 	io.on('connection', socket => {
-		socket.emit("UPDATE_ROOMS", rooms);
+		if (rooms.size) {socket.emit("UPDATE_ROOMS", [...rooms])};
 		// console.log(`All created rooms are: ${rooms}`);
 		const username = socket.handshake.query.username as string;
 		console.log(`${username} connected`);		
@@ -35,18 +35,37 @@ export default (io: Server) => {
 					socket.leave(newRoomName);
 					let counter = rooms.get(newRoomName);
 					if (counter) {
-						counter--
+						counter--;
 						if (counter > 0) {
-						rooms.set(newRoomName, counter)
+						rooms.set(newRoomName, counter);
 						} else {
-							io.emit("DELETING_ROOM", newRoomName)
+							io.emit("DELETING_ROOM", newRoomName);
+							rooms.delete(newRoomName);
 						}
 					} else {console.error("'Counter' is undefined!")}					
 				});
 			} else {
 				socket.emit("ROOM_EXISTS", "Such room already exists!")
-			}
-		})
+			};
+		});
+
+		socket.on("LEAVING_THE_ROOM", (theRoom) => {
+			socket.leave(theRoom);
+			let counter = rooms.get(theRoom);
+					if (counter) {
+						counter--;
+						if (counter > 0) {
+						rooms.set(theRoom, counter);
+						} else {
+							io.emit("DELETING_ROOM", theRoom);
+							rooms.delete(theRoom);
+						}
+					} else {console.error("'Counter' is undefined!")}
+		});
+
+
+
+
 	});	
 };
 

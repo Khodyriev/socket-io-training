@@ -1,5 +1,6 @@
 import { showInputModal, showResultsModal, showMessageModal } from './views/modal.mjs';
 import { appendRoomElement, updateNumberOfUsersInRoom, removeRoomElement } from './views/room.mjs';
+import { appendUserElement, changeReadyStatus, setProgress, removeUserElement } from './views/user.mjs';
 
 const username = sessionStorage.getItem('username');
 
@@ -51,19 +52,25 @@ socket.on("JOINING_NEW_ROOM", (newRoomName) => {
 	document.querySelector("#rooms-page").classList.toggle("display-none");
 	document.querySelector("#game-page").classList.toggle("display-none");
 	document.querySelector("#room-name").textContent = newRoomName;
+	appendUserElement({
+		username: username,
+		ready: false,
+		isCurrentUser: true
+	});
 	document.querySelector("#quit-room-btn").addEventListener("click", () => {
 		document.querySelector("#game-page").classList.toggle("display-none");
 		document.querySelector("#rooms-page").classList.toggle("display-none");
+		socket.emit("LEAVING_THE_ROOM", newRoomName)
 	})
 })
 
 
 
-socket.on("UPDATE_ROOMS", (rooms) => {
-	rooms.forEach((value, key) => {
+socket.on("UPDATE_ROOMS", (rooms) => {	
+	rooms.forEach((item) => {
 		appendRoomElement({
-			name: key,
-			numberOfUsers: value
+			name: item[0],
+			numberOfUsers: item[1]
 		})
 	});
 })
