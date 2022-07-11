@@ -2,7 +2,7 @@ import { emit } from 'process';
 import { Server } from 'socket.io';
 import { MAXIMUM_USERS_FOR_ONE_ROOM, SECONDS_TIMER_BEFORE_START_GAME, SECONDS_FOR_GAME } from './config';
 
-const activeUsers: Array<string> = [];
+const activeUsers: Map<string, string> = new Map();
 const rooms: Map<string, number> = new Map();
 
 export default (io: Server) => {
@@ -10,19 +10,19 @@ export default (io: Server) => {
 		if (rooms.size) {socket.emit("UPDATE_ROOMS", [...rooms])};
 		// console.log(`All created rooms are: ${rooms}`);
 		const username = socket.handshake.query.username as string;
-		console.log(`${username} connected`);		
-			if (activeUsers.indexOf(username) == -1) {
-				activeUsers.push(username);
+		console.log(`${username} connected`);
+		
+			if (!activeUsers.has(username)) {
+				activeUsers.set(username, socket.id);
 				socket.on("disconnect", () => {			
-					console.log(`${username} disconnected`);
-					const disconnectIndex: number = activeUsers.indexOf(username);
-					activeUsers.splice(disconnectIndex, 1);
+					console.log(`${username} disconnected`);					
+					activeUsers.delete(username);
 					// console.log(activeUsers);
 				  });
 			} else {
 				socket.emit("USER_EXIST", "Such user already exist.");				
 			};
-			console.log(`Active users are: ${activeUsers}`);
+			console.log(activeUsers);
 			
 		socket.on("CREATE_NEW_ROOM", (newRoomName) => {
 			// console.log(newRoomName);
