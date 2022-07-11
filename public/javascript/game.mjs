@@ -66,11 +66,19 @@ socket.on("JOINING_NEW_ROOM", (newRoomName) => {
 	});
 });
 
-socket.on("JOINED_ROOM", (room) => {
+socket.on("JOINED_ROOM", (room, usersInRoom) => {
 	document.querySelector("#rooms-page").classList.toggle("display-none");
 	document.querySelector("#game-page").classList.toggle("display-none");
 	document.querySelector("#room-name").textContent = room;
+	// console.log(usersInRoom);
+	let me = usersInRoom.indexOf(username);
+	usersInRoom.splice(me, 1);
 
+	usersInRoom.forEach((item) => appendUserElement({
+		username: item,
+		ready: false,
+		isCurrentUser: false
+	}));
 
 	appendUserElement({
 		username: username,
@@ -94,6 +102,16 @@ socket.on("UPDATE_COUNTER", (room, counter) => {
 		name: room, 
 		numberOfUsers: counter
 	})});
+
+socket.on("UPDATE_USER_ELEMENT", (user) => {
+	if(!document.querySelector(`.user[data-username='${user}']`)){
+			appendUserElement({
+			username: user,
+			ready: false,
+			isCurrentUser: false
+		})
+	};
+})	
 
 socket.on("REMOVE_USER_ELEMENT", (user) => {removeUserElement(user)});
 

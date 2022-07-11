@@ -57,7 +57,7 @@ export default (io: Server) => {
 						counter--;
 						if (counter > 0) {
 						rooms.set(theRoom, counter);
-						io.emit("REMOVE_USER_ELEMENT", user);
+						io.to(theRoom).emit("REMOVE_USER_ELEMENT", user);
 						io.emit("UPDATE_COUNTER", theRoom, counter);
 						} else {
 							io.emit("DELETING_ROOM", theRoom);
@@ -77,10 +77,16 @@ export default (io: Server) => {
 				io.emit("UPDATE_COUNTER", room, counter);
 				console.log(rooms);
 				console.log(room, counter);
-				socket.emit("JOINED_ROOM", room);
+				const usersIdInRoom = io.sockets.adapter.rooms.get(room);
+				const usersInRoom: Array<string> = [];
+				activeUsers.forEach((value, key) => {if (usersIdInRoom?.has(value)){usersInRoom.push(key)}});
+				console.log(usersInRoom);
+				socket.emit("JOINED_ROOM", room, usersInRoom);
+				io.to(room).emit("UPDATE_USER_ELEMENT", user);
 
 				socket.on("disconnect", () => {
 					socket.leave(room);
+					io.to(room).emit("REMOVE_USER_ELEMENT", user);
 					let counter = rooms.get(room);
 					if (counter) {
 						counter--;
