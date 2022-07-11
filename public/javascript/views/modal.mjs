@@ -20,9 +20,9 @@ const showInputModal = ({ title, onChange = () => {}, onSubmit = () => {} }) => 
 
 	submitButton.addEventListener('click', () => {
 		modalElement.remove();
-		onSubmit();
+		onSubmit();		
 	});
-	inputElement.addEventListener('change', e => onChange(e.target.value));
+	inputElement.addEventListener('change', e => onChange(e.target.value));	
 };
 
 const showResultsModal = ({ usersSortedArray, onClose = () => {} }) => {
