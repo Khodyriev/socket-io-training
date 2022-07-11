@@ -17,10 +17,19 @@ export default (io: Server) => {
 					console.log(activeUsers);
 				  });
 			} else {
-				socket.emit("USER_EXIST", "User already exist.");
-				console.log("USER_EXIST");
+				socket.emit("USER_EXIST", "User already exist.");				
 			};
-			console.log(activeUsers);		
+			console.log(activeUsers);
+			
+		socket.on("CREATE_NEW_ROOM", (newRoomName) => {
+			console.log(newRoomName);
+			if (rooms.indexOf(newRoomName) == -1) {
+				rooms.push(newRoomName);
+				console.log(rooms);
+			} else {
+				socket.emit("ROOM_EXISTS", "Such room already exists!")
+			}
+		})
 	});	
 };
 
