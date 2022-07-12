@@ -3,6 +3,7 @@ import { appendRoomElement, updateNumberOfUsersInRoom, removeRoomElement } from 
 import { appendUserElement, changeReadyStatus, setProgress, removeUserElement } from './views/user.mjs';
 
 const username = sessionStorage.getItem('username');
+let userReady = false;
 
 if (!username) {
 	window.location.replace('/login');
@@ -38,6 +39,23 @@ document.querySelector("#add-room-btn").addEventListener("click",
 		}
 	);
 
+const readyStatusHandler = (username) => {
+	userReady = !userReady;
+	changeReadyStatus ({username: username, ready: userReady});
+	const roomName = document.querySelector("#room-name").textContent;
+	if (userReady) {document.querySelector("#ready-btn").textContent = "NOT READY";}
+	else {document.querySelector("#ready-btn").textContent = "READY";}	
+	socket.emit("USER_STATUS_CHANGED", username, roomName, userReady);
+	console.log(username, roomName, userReady);
+};
+
+// const notReadyStatusHandler = (username) => {
+// 	changeReadyStatus ({username: username, ready: false});
+// 	const roomName = document.querySelector("#room-name").textContent;
+// 	document.querySelector("#ready-btn").textContent = "READY";
+// 	socket.emit("USER_STATUS_CHANGED_FALSE", username, roomName);
+// }
+
 socket.on("ROOM_EXISTS", (x) => {showMessageModal({message: x})});
 
 socket.on("ADD_NEW_ROOM", (newRoomName) => {
@@ -58,6 +76,9 @@ socket.on("JOINING_NEW_ROOM", (newRoomName) => {
 		ready: false,
 		isCurrentUser: true
 	});
+
+	document.querySelector("#ready-btn").addEventListener("click", () => {readyStatusHandler(username)});
+
 	document.querySelector("#quit-room-btn").addEventListener("click", () => {
 		removeUserElement(username);
 		document.querySelector("#game-page").classList.toggle("display-none");
@@ -85,6 +106,7 @@ socket.on("JOINED_ROOM", (room, usersInRoom) => {
 		ready: false,
 		isCurrentUser: true
 	});
+	document.querySelector("#ready-btn").addEventListener("click", () => {readyStatusHandler(username)});
 	document.querySelector("#quit-room-btn").addEventListener("click", () => {
 		removeUserElement(username);
 		document.querySelector("#game-page").classList.toggle("display-none");
@@ -111,7 +133,9 @@ socket.on("UPDATE_USER_ELEMENT", (user) => {
 			isCurrentUser: false
 		})
 	};
-})	
+})
+
+socket.on("UPDATE_USER_STATUS", (username, userReady) => {changeReadyStatus ({username: username, ready: userReady});})
 
 socket.on("REMOVE_USER_ELEMENT", (user) => {removeUserElement(user)});
 
