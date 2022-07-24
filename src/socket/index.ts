@@ -7,8 +7,7 @@ const rooms: Map<string, number> = new Map();
 
 export default (io: Server) => {
 	io.on('connection', socket => {
-		if (rooms.size) {socket.emit("UPDATE_ROOMS", [...rooms])};
-		// console.log(`All created rooms are: ${rooms}`);
+		if (rooms.size) {socket.emit("UPDATE_ROOMS", [...rooms])};		
 		const username = socket.handshake.query.username as string;
 		console.log(`${username} connected`);
 		
@@ -16,19 +15,16 @@ export default (io: Server) => {
 				activeUsers.set(username, socket.id);
 				socket.on("disconnect", () => {			
 					console.log(`${username} disconnected`);					
-					activeUsers.delete(username);
-					// console.log(activeUsers);
+					activeUsers.delete(username);					
 				  });
 			} else {
 				socket.emit("USER_EXIST", "Such user already exist.");				
 			};
 			console.log(activeUsers);
 			
-		socket.on("CREATE_NEW_ROOM", (newRoomName) => {
-			// console.log(newRoomName);
+		socket.on("CREATE_NEW_ROOM", (newRoomName) => {			
 			if (!rooms.has(newRoomName)) {
-				rooms.set(newRoomName, 1);
-				// console.log(rooms);
+				rooms.set(newRoomName, 1);				
 				io.emit("ADD_NEW_ROOM", newRoomName);
 				socket.join(newRoomName);
 				socket.emit("JOINING_NEW_ROOM", newRoomName);
@@ -104,11 +100,6 @@ export default (io: Server) => {
 		socket.on("USER_STATUS_CHANGED", (username, roomName, userReady) => {
 			io.to(roomName).emit("UPDATE_USER_STATUS", username, userReady)
 		})
-
-
-
-
-
 	});	
 };
 

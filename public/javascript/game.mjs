@@ -24,8 +24,7 @@ socket.on("USER_EXIST",
 let newRoomName = null;
 
 const onSubmitRoomName = () => {
-	socket.emit("CREATE_NEW_ROOM", newRoomName);
-	// console.log(newRoomName);
+	socket.emit("CREATE_NEW_ROOM", newRoomName);	
 };
 
 document.querySelector("#add-room-btn").addEventListener("click", 
@@ -48,13 +47,6 @@ const readyStatusHandler = (username) => {
 	socket.emit("USER_STATUS_CHANGED", username, roomName, userReady);
 	console.log(username, roomName, userReady);
 };
-
-// const notReadyStatusHandler = (username) => {
-// 	changeReadyStatus ({username: username, ready: false});
-// 	const roomName = document.querySelector("#room-name").textContent;
-// 	document.querySelector("#ready-btn").textContent = "READY";
-// 	socket.emit("USER_STATUS_CHANGED_FALSE", username, roomName);
-// }
 
 socket.on("ROOM_EXISTS", (x) => {showMessageModal({message: x})});
 
@@ -90,8 +82,7 @@ socket.on("JOINING_NEW_ROOM", (newRoomName) => {
 socket.on("JOINED_ROOM", (room, usersInRoom) => {
 	document.querySelector("#rooms-page").classList.toggle("display-none");
 	document.querySelector("#game-page").classList.toggle("display-none");
-	document.querySelector("#room-name").textContent = room;
-	// console.log(usersInRoom);
+	document.querySelector("#room-name").textContent = room;	
 	let me = usersInRoom.indexOf(username);
 	usersInRoom.splice(me, 1);
 
