@@ -1,8 +1,7 @@
 import { emit } from 'process';
 import { Server } from 'socket.io';
 import { MAXIMUM_USERS_FOR_ONE_ROOM, SECONDS_TIMER_BEFORE_START_GAME, SECONDS_FOR_GAME } from './config';
-import { sayGoodbyeToLeavingPlayer, leavingMessage } from './commentator-module/commentator-main';
-// let { sayGoodbyeToLeavingPlayer } = await import('./commentator-module/commentator-main.mjs')
+import { sayGoodbyeToLeavingPlayer, sayHelloToNextPlayer } from './commentator-module/commentator-main';
 
 const activeUsers: Map<string, string> = new Map();
 const rooms: Map<string, number> = new Map();
@@ -10,19 +9,18 @@ const rooms: Map<string, number> = new Map();
 export default (io: Server) => {
 	io.on('connection', socket => {
 		if (rooms.size) {socket.emit("UPDATE_ROOMS", [...rooms])};		
-		const username = socket.handshake.query.username as string;
-		// console.log(`${username} connected`);
+		const username = socket.handshake.query.username as string;		
 		
 			if (!activeUsers.has(username)) {
 				activeUsers.set(username, socket.id);
 				socket.on("disconnect", () => {			
-					console.log(`${username} disconnected`);					
+					// console.log(`${username} disconnected`);					
 					activeUsers.delete(username);					
 				  });
 			} else {
 				socket.emit("USER_EXIST", "Such user already exist.");				
 			};
-			console.log(activeUsers);
+			// console.log(activeUsers);
 			
 		socket.on("CREATE_NEW_ROOM", (newRoomName) => {			
 			if (!rooms.has(newRoomName)) {
@@ -61,11 +59,8 @@ export default (io: Server) => {
 							io.emit("DELETING_ROOM", theRoom);
 							rooms.delete(theRoom);
 						}
-					} else {console.error("'Counter' is undefined!")}
-			// io.to(theRoom).emit("PLAYER_GOODBYE", `Unfortunately, player ${user} is leaving us without participating in the race`);
-			// sayGoodbyeToLeavingPlayer();
-			// leavingMessage
-			io.to(theRoom).emit("PLAYER_GOODBYE", leavingMessage(user));
+					} else {console.error("'Counter' is undefined!")}			
+			sayGoodbyeToLeavingPlayer(io, theRoom, user);			
 		});
 
 		socket.on("JOINING_ROOM", (room, user) => {
@@ -77,14 +72,16 @@ export default (io: Server) => {
 				counter++
 				rooms.set(room, counter);
 				io.emit("UPDATE_COUNTER", room, counter);
-				console.log(rooms);
-				console.log(room, counter);
+				// console.log(rooms);
+				console.log('log in "JOINING_ROOM". room:', room, 'counter', counter);
 				const usersIdInRoom = io.sockets.adapter.rooms.get(room);
 				const usersInRoom: Array<string> = [];
 				activeUsers.forEach((value, key) => {if (usersIdInRoom?.has(value)){usersInRoom.push(key)}});
-				console.log(usersInRoom);
+				// console.log(usersInRoom);
 				socket.emit("JOINED_ROOM", room, usersInRoom);
 				io.to(room).emit("UPDATE_USER_ELEMENT", user);
+
+				sayHelloToNextPlayer(io, room, user, counter);
 
 				socket.on("disconnect", () => {
 					socket.leave(room);
@@ -98,7 +95,7 @@ export default (io: Server) => {
 							io.emit("DELETING_ROOM", room);
 							rooms.delete(room);
 						}
-					} else {console.error("'Counter' is undefined!")}					
+					} else {console.error("'Counter' is undefined! In 'JOINING_ROOM'")}					
 				});	
 			}
 		})

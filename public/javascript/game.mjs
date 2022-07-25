@@ -1,7 +1,7 @@
 import { showInputModal, showResultsModal, showMessageModal } from './views/modal.mjs';
 import { appendRoomElement, updateNumberOfUsersInRoom, removeRoomElement } from './views/room.mjs';
 import { appendUserElement, changeReadyStatus, setProgress, removeUserElement } from './views/user.mjs';
-import { welcomeFirstPlayer,sayGoodbye } from './comment-view-module/comments-view.mjs';
+import { welcomeFirstPlayer, sayGoodbye, welcomeNextPlayer } from './comment-view-module/comments-view.mjs';
 
 const username = sessionStorage.getItem('username');
 let userReady = false;
@@ -108,8 +108,8 @@ socket.on("JOINED_ROOM", (room, usersInRoom) => {
 	// setTimeout((() => commentNode.innerHTML = `And glad to welcome our next racer - the ${username}`), 7000)
 });
 
-// socket.on("PLAYER_GOODBYE", (message) => sayGoodbye(message));
 sayGoodbye(socket);
+welcomeNextPlayer(socket);
 
 socket.on("DELETING_ROOM", (room) => removeRoomElement(room));
 
