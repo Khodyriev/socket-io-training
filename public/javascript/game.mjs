@@ -1,6 +1,7 @@
 import { showInputModal, showResultsModal, showMessageModal } from './views/modal.mjs';
 import { appendRoomElement, updateNumberOfUsersInRoom, removeRoomElement } from './views/room.mjs';
 import { appendUserElement, changeReadyStatus, setProgress, removeUserElement } from './views/user.mjs';
+import { welcomeFirstPlayer, sayGoodbye, welcomeNextPlayer, randomFactView, statusChangeComment } from './comment-view-module/comments-view.mjs';
 
 const username = sessionStorage.getItem('username');
 let userReady = false;
@@ -24,8 +25,7 @@ socket.on("USER_EXIST",
 let newRoomName = null;
 
 const onSubmitRoomName = () => {
-	socket.emit("CREATE_NEW_ROOM", newRoomName);
-	// console.log(newRoomName);
+	socket.emit("CREATE_NEW_ROOM", newRoomName);	
 };
 
 document.querySelector("#add-room-btn").addEventListener("click", 
@@ -46,20 +46,11 @@ const readyStatusHandler = (username) => {
 	if (userReady) {document.querySelector("#ready-btn").textContent = "NOT READY";}
 	else {document.querySelector("#ready-btn").textContent = "READY";}	
 	socket.emit("USER_STATUS_CHANGED", username, roomName, userReady);
-	console.log(username, roomName, userReady);
 };
-
-// const notReadyStatusHandler = (username) => {
-// 	changeReadyStatus ({username: username, ready: false});
-// 	const roomName = document.querySelector("#room-name").textContent;
-// 	document.querySelector("#ready-btn").textContent = "READY";
-// 	socket.emit("USER_STATUS_CHANGED_FALSE", username, roomName);
-// }
 
 socket.on("ROOM_EXISTS", (x) => {showMessageModal({message: x})});
 
 socket.on("ADD_NEW_ROOM", (newRoomName) => {
-	console.log(`A new room - ${newRoomName} was added`)
 	appendRoomElement({
 		name: newRoomName,
 		numberOfUsers: 1
@@ -85,13 +76,13 @@ socket.on("JOINING_NEW_ROOM", (newRoomName) => {
 		document.querySelector("#rooms-page").classList.toggle("display-none");
 		socket.emit("LEAVING_THE_ROOM", newRoomName, username)
 	});
+	welcomeFirstPlayer(username);	
 });
 
 socket.on("JOINED_ROOM", (room, usersInRoom) => {
 	document.querySelector("#rooms-page").classList.toggle("display-none");
 	document.querySelector("#game-page").classList.toggle("display-none");
-	document.querySelector("#room-name").textContent = room;
-	// console.log(usersInRoom);
+	document.querySelector("#room-name").textContent = room;	
 	let me = usersInRoom.indexOf(username);
 	usersInRoom.splice(me, 1);
 
@@ -112,8 +103,13 @@ socket.on("JOINED_ROOM", (room, usersInRoom) => {
 		document.querySelector("#game-page").classList.toggle("display-none");
 		document.querySelector("#rooms-page").classList.toggle("display-none");
 		socket.emit("LEAVING_THE_ROOM", room, username)
-	});
+	});	
 });
+
+sayGoodbye(socket);
+welcomeNextPlayer(socket);
+randomFactView(socket);
+statusChangeComment(socket);
 
 socket.on("DELETING_ROOM", (room) => removeRoomElement(room));
 

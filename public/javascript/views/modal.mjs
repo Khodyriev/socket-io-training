@@ -12,7 +12,7 @@ const showInputModal = ({ title, onChange = () => {}, onSubmit = () => {} }) => 
 	});
 	const inputElement = createElement({
 		tagName: 'input',
-		className: 'modal-input',
+		className: 'modal-input',		
 	});
 
 	modalElement.append(getFooter([inputElement, submitButton]));
