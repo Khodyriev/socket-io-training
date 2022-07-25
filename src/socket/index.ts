@@ -1,7 +1,7 @@
 import { emit } from 'process';
 import { Server } from 'socket.io';
 import { MAXIMUM_USERS_FOR_ONE_ROOM, SECONDS_TIMER_BEFORE_START_GAME, SECONDS_FOR_GAME } from './config';
-import { sayGoodbyeToLeavingPlayer, sayHelloToNextPlayer } from './commentator-module/commentator-main';
+import { sayGoodbyeToLeavingPlayer, sayHelloToNextPlayer, randomFactSend } from './commentator-module/commentator-main';
 
 const activeUsers: Map<string, string> = new Map();
 const rooms: Map<string, number> = new Map();
@@ -13,21 +13,19 @@ export default (io: Server) => {
 		
 			if (!activeUsers.has(username)) {
 				activeUsers.set(username, socket.id);
-				socket.on("disconnect", () => {			
-					// console.log(`${username} disconnected`);					
+				socket.on("disconnect", () => {				
 					activeUsers.delete(username);					
 				  });
 			} else {
 				socket.emit("USER_EXIST", "Such user already exist.");				
-			};
-			// console.log(activeUsers);
+			};			
 			
 		socket.on("CREATE_NEW_ROOM", (newRoomName) => {			
 			if (!rooms.has(newRoomName)) {
 				rooms.set(newRoomName, 1);				
 				io.emit("ADD_NEW_ROOM", newRoomName);
 				socket.join(newRoomName);
-				socket.emit("JOINING_NEW_ROOM", newRoomName);
+				socket.emit("JOINING_NEW_ROOM", newRoomName);												
 				socket.on("disconnect", () => {
 					socket.leave(newRoomName);
 					let counter = rooms.get(newRoomName);
@@ -44,6 +42,7 @@ export default (io: Server) => {
 			} else {
 				socket.emit("ROOM_EXISTS", "Such room already exists!")
 			};
+			randomFactSend(io, newRoomName);
 		});
 
 		socket.on("LEAVING_THE_ROOM", (theRoom, user) => {
@@ -71,13 +70,10 @@ export default (io: Server) => {
 				socket.join(room);
 				counter++
 				rooms.set(room, counter);
-				io.emit("UPDATE_COUNTER", room, counter);
-				// console.log(rooms);
-				console.log('log in "JOINING_ROOM". room:', room, 'counter', counter);
+				io.emit("UPDATE_COUNTER", room, counter);				
 				const usersIdInRoom = io.sockets.adapter.rooms.get(room);
 				const usersInRoom: Array<string> = [];
 				activeUsers.forEach((value, key) => {if (usersIdInRoom?.has(value)){usersInRoom.push(key)}});
-				// console.log(usersInRoom);
 				socket.emit("JOINED_ROOM", room, usersInRoom);
 				io.to(room).emit("UPDATE_USER_ELEMENT", user);
 

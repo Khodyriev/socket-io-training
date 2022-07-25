@@ -1,7 +1,7 @@
 import { showInputModal, showResultsModal, showMessageModal } from './views/modal.mjs';
 import { appendRoomElement, updateNumberOfUsersInRoom, removeRoomElement } from './views/room.mjs';
 import { appendUserElement, changeReadyStatus, setProgress, removeUserElement } from './views/user.mjs';
-import { welcomeFirstPlayer, sayGoodbye, welcomeNextPlayer } from './comment-view-module/comments-view.mjs';
+import { welcomeFirstPlayer, sayGoodbye, welcomeNextPlayer, randomFactView } from './comment-view-module/comments-view.mjs';
 
 const username = sessionStorage.getItem('username');
 let userReady = false;
@@ -51,7 +51,6 @@ const readyStatusHandler = (username) => {
 socket.on("ROOM_EXISTS", (x) => {showMessageModal({message: x})});
 
 socket.on("ADD_NEW_ROOM", (newRoomName) => {
-	console.log(`A new room - ${newRoomName} was added`)
 	appendRoomElement({
 		name: newRoomName,
 		numberOfUsers: 1
@@ -104,12 +103,12 @@ socket.on("JOINED_ROOM", (room, usersInRoom) => {
 		document.querySelector("#game-page").classList.toggle("display-none");
 		document.querySelector("#rooms-page").classList.toggle("display-none");
 		socket.emit("LEAVING_THE_ROOM", room, username)
-	});
-	// setTimeout((() => commentNode.innerHTML = `And glad to welcome our next racer - the ${username}`), 7000)
+	});	
 });
 
 sayGoodbye(socket);
 welcomeNextPlayer(socket);
+randomFactView(socket);
 
 socket.on("DELETING_ROOM", (room) => removeRoomElement(room));
 

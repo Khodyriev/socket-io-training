@@ -1,4 +1,5 @@
-import { helloMessageForNext } from './hello-factory'
+import { helloMessageForNext } from './hello-factory';
+import { someFact } from './fact-facade';
 
 
 export const sayGoodbyeToLeavingPlayer = (io, theRoom, user) => 
@@ -8,3 +9,5 @@ export const sayHelloToNextPlayer = (io, room, user, counter) => {
     const message = helloMessageForNext.create(counter, user)
     io.to(room).emit("WELCOME_NEXT_PLAYER", message);
 }
+
+export const randomFactSend = (io, newRoomName) => setInterval(() => io.to(newRoomName).emit("RANDOM_FACT", someFact()), 30000)
