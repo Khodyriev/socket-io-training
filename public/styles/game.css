@@ -1,3 +1,5 @@
+@import "./commentator.css";
+
 #quit-room-btn {
     padding: 10px 25px;
     border: 1px solid var(--main-button-border-color);
@@ -19,35 +21,6 @@
     justify-content: center;
     align-items: center;
     position: relative;
-}
-
-#comment-container {
-    width: 50vw;
-    height: 40vh;
-    margin: 25px;
-    margin-left: 20vw;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    position: relative;
-}
-
-#comment-wrap {
-    background-image: url("../img/message_container.png");
-    background-size: 100% 100%;
-    margin: auto 30px 8px 5%;
-    align-self: flex-end;
-    height: 1fr;
-}
-
-#comment {
-    margin: 8px 12px 12% 16px;
-}
-
-#commentator {
-    padding-left: 25%;
-    align-self: flex-start;
-    max-height: 80px;
 }
 
 #ready-btn {
