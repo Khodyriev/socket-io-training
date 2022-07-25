@@ -1,6 +1,7 @@
 import { emit } from 'process';
 import { Server } from 'socket.io';
 import { MAXIMUM_USERS_FOR_ONE_ROOM, SECONDS_TIMER_BEFORE_START_GAME, SECONDS_FOR_GAME } from './config';
+import { sayGoodbyeToLeavingPlayer, leavingMessage } from './commentator-module/commentator-main';
 
 const activeUsers: Map<string, string> = new Map();
 const rooms: Map<string, number> = new Map();
@@ -9,7 +10,7 @@ export default (io: Server) => {
 	io.on('connection', socket => {
 		if (rooms.size) {socket.emit("UPDATE_ROOMS", [...rooms])};		
 		const username = socket.handshake.query.username as string;
-		console.log(`${username} connected`);
+		// console.log(`${username} connected`);
 		
 			if (!activeUsers.has(username)) {
 				activeUsers.set(username, socket.id);
@@ -60,6 +61,8 @@ export default (io: Server) => {
 							rooms.delete(theRoom);
 						}
 					} else {console.error("'Counter' is undefined!")}
+			io.to(theRoom).emit("PLAYER_GOODBYE", `Unfortunately, player ${user} is leaving us without participating in the race`);
+			// sayGoodbyeToLeavingPlayer(user);
 		});
 
 		socket.on("JOINING_ROOM", (room, user) => {

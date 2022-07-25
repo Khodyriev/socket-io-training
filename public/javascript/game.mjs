@@ -1,6 +1,7 @@
 import { showInputModal, showResultsModal, showMessageModal } from './views/modal.mjs';
 import { appendRoomElement, updateNumberOfUsersInRoom, removeRoomElement } from './views/room.mjs';
 import { appendUserElement, changeReadyStatus, setProgress, removeUserElement } from './views/user.mjs';
+import { welcomeFirstPlayer,sayGoodbye } from './comment-view-module/comments-view.mjs';
 
 const username = sessionStorage.getItem('username');
 let userReady = false;
@@ -45,7 +46,6 @@ const readyStatusHandler = (username) => {
 	if (userReady) {document.querySelector("#ready-btn").textContent = "NOT READY";}
 	else {document.querySelector("#ready-btn").textContent = "READY";}	
 	socket.emit("USER_STATUS_CHANGED", username, roomName, userReady);
-	console.log(username, roomName, userReady);
 };
 
 socket.on("ROOM_EXISTS", (x) => {showMessageModal({message: x})});
@@ -77,6 +77,7 @@ socket.on("JOINING_NEW_ROOM", (newRoomName) => {
 		document.querySelector("#rooms-page").classList.toggle("display-none");
 		socket.emit("LEAVING_THE_ROOM", newRoomName, username)
 	});
+	welcomeFirstPlayer(username);	
 });
 
 socket.on("JOINED_ROOM", (room, usersInRoom) => {
@@ -104,7 +105,10 @@ socket.on("JOINED_ROOM", (room, usersInRoom) => {
 		document.querySelector("#rooms-page").classList.toggle("display-none");
 		socket.emit("LEAVING_THE_ROOM", room, username)
 	});
+	// setTimeout((() => commentNode.innerHTML = `And glad to welcome our next racer - the ${username}`), 7000)
 });
+
+socket.on("PLAYER_GOODBYE", (message) => sayGoodbye(message));
 
 socket.on("DELETING_ROOM", (room) => removeRoomElement(room));
 
