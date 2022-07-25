@@ -108,7 +108,8 @@ socket.on("JOINED_ROOM", (room, usersInRoom) => {
 	// setTimeout((() => commentNode.innerHTML = `And glad to welcome our next racer - the ${username}`), 7000)
 });
 
-socket.on("PLAYER_GOODBYE", (message) => sayGoodbye(message));
+// socket.on("PLAYER_GOODBYE", (message) => sayGoodbye(message));
+sayGoodbye(socket);
 
 socket.on("DELETING_ROOM", (room) => removeRoomElement(room));
 
