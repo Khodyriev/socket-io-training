@@ -96,7 +96,7 @@ export default (io: Server) => {
 			}
 		})
 
-		socket.on("USER_STATUS_CHANGED", (username, roomName, userReady) => {
+		socket.on("USER_STATUS_CHANGED", (username, roomName, userReady) => {			
 			io.to(roomName).emit("UPDATE_USER_STATUS", username, userReady)
 		})
 	});	

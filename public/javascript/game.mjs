@@ -1,7 +1,7 @@
 import { showInputModal, showResultsModal, showMessageModal } from './views/modal.mjs';
 import { appendRoomElement, updateNumberOfUsersInRoom, removeRoomElement } from './views/room.mjs';
 import { appendUserElement, changeReadyStatus, setProgress, removeUserElement } from './views/user.mjs';
-import { welcomeFirstPlayer, sayGoodbye, welcomeNextPlayer, randomFactView } from './comment-view-module/comments-view.mjs';
+import { welcomeFirstPlayer, sayGoodbye, welcomeNextPlayer, randomFactView, statusChangeComment } from './comment-view-module/comments-view.mjs';
 
 const username = sessionStorage.getItem('username');
 let userReady = false;
@@ -109,6 +109,7 @@ socket.on("JOINED_ROOM", (room, usersInRoom) => {
 sayGoodbye(socket);
 welcomeNextPlayer(socket);
 randomFactView(socket);
+statusChangeComment(socket);
 
 socket.on("DELETING_ROOM", (room) => removeRoomElement(room));
 
